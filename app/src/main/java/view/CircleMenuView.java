@@ -156,20 +156,20 @@ public class CircleMenuView extends View{
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
                 Log.i("ver","Down");
-                current_angle = getAngle(event.getX(),event.getY());
+                current_angle = ((360-getAngle(event.getX(),event.getY()))+90)%360;
                 break;
             case MotionEvent.ACTION_MOVE:
                 Log.e("current_angle",current_angle+"");
-                Log.e("getAngle",getAngle(event.getX(),event.getY())+"");
+                Log.e("getAngle",((360-getAngle(event.getX(),event.getY()))+90)%360+"");
                 Log.e("total_angle",total_angle+"");
                 Log.e("X",event.getX()+"");
                 Log.e("Y",event.getY()+"");
 
-                singer_angle = total_angle+(current_angle-getAngle(event.getX(),event.getY()))%360;
+                singer_angle = total_angle+(((360-getAngle(event.getX(),event.getY()))+90)%360-current_angle)%360;
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
-                total_angle = current_angle-getAngle(event.getX(),event.getY());
+                total_angle =total_angle+ ((360-getAngle(event.getX(),event.getY()))+90)%360-current_angle;
                 velocityTracker.computeCurrentVelocity(500);
                 Log.i("vertical",velocityTracker.getXVelocity()+";    "+velocityTracker.getYVelocity());
                 break;
