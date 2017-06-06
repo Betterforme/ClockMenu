@@ -24,7 +24,7 @@ public class CircleMenuView extends View{
     //每个圆弧的角度
     private float avg_angle;
     //手指旋转的角度
-    private double singer_angle=0;
+    private double singer_angle=0,current_angle=0,total_angle = 0;
     //圆形的位置x,y,半径r
     private float x,y,r,w,h;
     //画圆环的外矩形
@@ -72,7 +72,8 @@ public class CircleMenuView extends View{
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.rotate(-(float) singer_angle,x,y);
+        Log.e("ver",singer_angle+"");
+        canvas.rotate((float) singer_angle,x,y);
         drawArc(canvas);
     }
 
@@ -117,7 +118,7 @@ public class CircleMenuView extends View{
      */
     private double getAngle(double x, double y) {
         x = x - (w / 2d);
-        y = w - y - (h / 2d);
+        y = h - y - (h / 2d);
 
         switch (getQuadrant(x, y)) {
             case 1:
@@ -155,13 +156,20 @@ public class CircleMenuView extends View{
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
                 Log.i("ver","Down");
+                current_angle = getAngle(event.getX(),event.getY());
                 break;
             case MotionEvent.ACTION_MOVE:
-                singer_angle = getAngle(event.getX(),event.getY());
+                Log.e("current_angle",current_angle+"");
+                Log.e("getAngle",getAngle(event.getX(),event.getY())+"");
+                Log.e("total_angle",total_angle+"");
+                Log.e("X",event.getX()+"");
+                Log.e("Y",event.getY()+"");
+
+                singer_angle = total_angle+(current_angle-getAngle(event.getX(),event.getY()))%360;
                 invalidate();
-                Log.i("ver",getAngle(event.getX(),event.getY())+"");
                 break;
             case MotionEvent.ACTION_UP:
+                total_angle = current_angle-getAngle(event.getX(),event.getY());
                 velocityTracker.computeCurrentVelocity(500);
                 Log.i("vertical",velocityTracker.getXVelocity()+";    "+velocityTracker.getYVelocity());
                 break;
