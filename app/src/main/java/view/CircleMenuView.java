@@ -23,6 +23,10 @@ import java.util.ArrayList;
 
 public class CircleMenuView extends View{
 
+    //动画
+    ValueAnimator valueAnimator;
+    //动画是否在滚动中
+    private Boolean running = false;
     //padding =margin的值
     private int margin;
     //惯性旋转的速率；值越大旋转越慢
@@ -173,13 +177,8 @@ public class CircleMenuView extends View{
     private void drawArc(Canvas canvas){
         paintArc.setStrokeWidth(ARC_WIDTH);
         for (int i = 0; i < data.size(); i++) {
-//            if(data.get(i).getIsChoose() == 0)
             paintArc.setColor(GREEN);
-                canvas.drawArc(mRect,-90+avg_angle*i,avg_angle*(i+1),false,paintArc);
-//            else{
-//                paintArc.setColor(Color.parseColor("#e0f5ff"));
-//                canvas.drawArc(mRect,-90+avg_angle*i,avg_angle,false,paintArc);
-//            }
+            canvas.drawArc(mRect,-90+avg_angle*i,avg_angle*(i+1),false,paintArc);
         }
         for (int i = 0; i < data.size(); i++) {
             if(data.get(i).getIsChoose() == 1){
@@ -191,8 +190,6 @@ public class CircleMenuView extends View{
                 canvas.drawArc(mRect,-90+avg_angle*i-avg_angle/2,avg_angle,false,paintArc);
             }else
                 paintArc.setColor(GREEN);
-
-
         }
 
         canvas.save();
@@ -265,6 +262,10 @@ public class CircleMenuView extends View{
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
+
+        if(running == true){
+            return true;
+        }
         if(velocityTracker == null){
             velocityTracker = VelocityTracker.obtain();
         }
@@ -279,8 +280,8 @@ public class CircleMenuView extends View{
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
+                setDataAllUnChoose();
                 total_angle =total_angle+ ((360-getAngle(event.getX(),event.getY()))+90)%360-current_angle;
-                Log.e("total_angle",(int)total_angle%360+"");
                 velocityTracker.computeCurrentVelocity(1000);
                 if(Math.abs(velocityTracker.getYVelocity())>500 ){
                     endAngle = (int)velocityTracker.getYVelocity();
@@ -327,7 +328,7 @@ public class CircleMenuView extends View{
         }else if(endAngle <-10800){
             endAngle = -10800;
         }
-        ValueAnimator valueAnimator = ValueAnimator.ofInt(0,endAngle);
+        valueAnimator = ValueAnimator.ofInt(0,endAngle);
         valueAnimator.setDuration(Math.abs(endAngle)/3);
         valueAnimator.setInterpolator(new DecelerateInterpolator(1f));
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -344,6 +345,7 @@ public class CircleMenuView extends View{
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                running = false;
                 total_angle = total_angle+endAngle/rate%360;
                 getChooseItem();
             }
@@ -355,6 +357,13 @@ public class CircleMenuView extends View{
             }
         });
         valueAnimator.start();
+        running = true;
+    }
+
+    public void stopAnima(){
+        valueAnimator.cancel();
+        clearAnimation();
+        valueAnimator = null;
     }
 
     /**
