@@ -162,13 +162,21 @@ public class CircleMenuView extends View{
     private void drawArc(Canvas canvas){
         paintArc.setStrokeWidth(ARC_WIDTH);
         for (int i = 0; i < data.size(); i++) {
-            if(data.get(i).getIsChoose() == 0)
+//            if(data.get(i).getIsChoose() == 0)
+            paintArc.setColor(GREEN);
                 canvas.drawArc(mRect,-90+avg_angle*i,avg_angle*(i+1),false,paintArc);
-            else{
+//            else{
+//                paintArc.setColor(Color.parseColor("#e0f5ff"));
+//                canvas.drawArc(mRect,-90+avg_angle*i,avg_angle,false,paintArc);
+//            }
+        }
+        for (int i = 0; i < data.size(); i++) {
+            if(data.get(i).getIsChoose() == 1){
                 paintArc.setColor(Color.parseColor("#e0f5ff"));
-                canvas.drawArc(mRect,-90+avg_angle*i,avg_angle*(i+1),false,paintArc);
+                canvas.drawArc(mRect,-90+avg_angle*i-avg_angle/2,avg_angle,false,paintArc);
             }
         }
+
         canvas.save();
         canvas.rotate(-avg_angle/2,x,y);
         for (int i = 0; i < data.size(); i++) {
@@ -303,7 +311,7 @@ public class CircleMenuView extends View{
         }
         ValueAnimator valueAnimator = ValueAnimator.ofInt(0,endAngle);
         valueAnimator.setDuration(Math.abs(endAngle)/3);
-        valueAnimator.setInterpolator(new DecelerateInterpolator(2f));
+        valueAnimator.setInterpolator(new DecelerateInterpolator(1f));
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -346,11 +354,17 @@ public class CircleMenuView extends View{
             ret = 0;
         data.get(ret).setIsChoose(1);
         invalidate();
+        if(spi!=null){
+            spi.ChooseItem(data.get(ret));
+        }
         return ret;
     }
 
+    public void setItemChooseListner(StopPositionItem spi){
+        this.spi = spi;
+    }
     private  StopPositionItem spi;
-    interface StopPositionItem{
+    public interface StopPositionItem{
         public void ChooseItem(ItemBean ib);
     }
 
