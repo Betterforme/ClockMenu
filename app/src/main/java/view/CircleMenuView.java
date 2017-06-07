@@ -49,6 +49,8 @@ public class CircleMenuView extends View{
     private static final int GREEN = Color.parseColor("#43c562");
     private static final int GREY = Color.parseColor("#959595");
     private static final int TRAIGANGLE_BLUE = Color.parseColor("#24bbfd");
+    private static final int FINISH_GREY = Color.parseColor("#cecece");
+
     //文字的大小
     private static final int TEXT_SIZE = 30;
     public CircleMenuView(Context context){
@@ -68,6 +70,10 @@ public class CircleMenuView extends View{
        for (int i = 0; i < 12; i++) {
            ItemBean item = new ItemBean();
            item.setHw_item("黄冈"+i);
+           if(i == 3)
+               item.setState(3);
+           if(i == 7)
+               item.setState(3);
            data.add(item);
        }
        avg_angle = 360/data.size();
@@ -126,6 +132,11 @@ public class CircleMenuView extends View{
             String text = data.get(j).getHw_item();
             for (int i = 0; i < text.length(); i++) {
                 String s = text.substring(i,i+1);
+                if(data.get(j).getIsChoose() == 1)
+                    textPaint.setColor(TRAIGANGLE_BLUE);
+                else
+                    textPaint.setColor(Color.WHITE);
+
                 if(i == 0)
                     canvas.drawText(s,x-getTextWidth(s)/2,y/7*(i+1),textPaint);
                 else
@@ -175,6 +186,13 @@ public class CircleMenuView extends View{
                 paintArc.setColor(Color.parseColor("#e0f5ff"));
                 canvas.drawArc(mRect,-90+avg_angle*i-avg_angle/2,avg_angle,false,paintArc);
             }
+            if(data.get(i).getState() == 3){
+                paintArc.setColor(FINISH_GREY);
+                canvas.drawArc(mRect,-90+avg_angle*i-avg_angle/2,avg_angle,false,paintArc);
+            }else
+                paintArc.setColor(GREEN);
+
+
         }
 
         canvas.save();
