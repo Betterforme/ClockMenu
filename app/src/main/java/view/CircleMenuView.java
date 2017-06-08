@@ -119,9 +119,9 @@ public class CircleMenuView extends View{
      */
     private void drawTriangle(Canvas canvas){
         Path path = new Path();
-        path.moveTo(x-15+margin,margin);
-        path.lineTo(x+margin,20+margin);
-        path.lineTo(x+15+margin,margin);
+        path.moveTo(x-15+getLeft(),getTop());
+        path.lineTo(x+getLeft(),20+getTop());
+        path.lineTo(x+15+getLeft(),getTop());
         path.close();
         canvas.drawPath(path,traiganglePaint);
     }
@@ -207,6 +207,7 @@ public class CircleMenuView extends View{
        int width = MeasureSpec.getSize(widthMeasureSpec);
        int mode = MeasureSpec.getMode(widthMeasureSpec);
        margin = getPaddingBottom();
+        Log.e("210",getLeft()+"   "+margin);
        if(mode == MeasureSpec.AT_MOST){
            setMeasuredDimension(500,500);
            x = 250;
