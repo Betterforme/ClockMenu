@@ -3,13 +3,17 @@ package view;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -23,8 +27,11 @@ import java.util.ArrayList;
 
 public class CircleMenuView extends View{
 
+    //线性渐变的值
+    private LinearGradient lg;
+
     //动画
-    ValueAnimator valueAnimator;
+    private ValueAnimator valueAnimator;
     //动画是否在滚动中
     private Boolean running = false;
     //padding =margin的值
@@ -48,12 +55,13 @@ public class CircleMenuView extends View{
     //扇形区域中的数据
     public ArrayList<ItemBean> data = new ArrayList<>();
     //各种画笔
-    private Paint paintArc,whitePaint,textPaint,traiganglePaint;
+    private Paint paintArc,whitePaint,textPaint,traiganglePaint,centerCirclePaint;
     //圆环的颜色
-    private static final int GREEN = Color.parseColor("#43c562");
+    private static final int GREEN = Color.parseColor("#25bbfd");
     private static final int GREY = Color.parseColor("#959595");
-    private static final int TRAIGANGLE_BLUE = Color.parseColor("#24bbfd");
+    private static final int TRAIGANGLE_BLUE = Color.parseColor("#fee352");
     private static final int FINISH_GREY = Color.parseColor("#cecece");
+    private static final int CIRCLE_YELLO = Color.parseColor("#fdc01a");
 
     //文字的大小
     private static final int TEXT_SIZE = 30;
@@ -67,41 +75,61 @@ public class CircleMenuView extends View{
     public CircleMenuView(Context context, AttributeSet attributes, int flag){
         super(context,attributes,flag);
         initData();
-
     }
 
-   public void initData(){
-       for (int i = 0; i < 12; i++) {
-           ItemBean item = new ItemBean();
-           item.setHw_item("黄冈"+i);
-           if(i == 3)
-               item.setState(3);
-           if(i == 7)
-               item.setState(3);
-           data.add(item);
-       }
-       avg_angle = 360/data.size();
+    public void initData(){
+        for (int i = 0; i < 12; i++) {
+            ItemBean item = new ItemBean();
+            item.setHw_item("黄冈小状元");
+            if(i == 0){
+                item.setIsChoose(1);
+            }
+            if(i == 3)
+                item.setState(3);
+            if(i == 7)
+                item.setState(3);
+            data.add(item);
+        }
+        avg_angle = 360/data.size();
 
-       whitePaint = new Paint();
-       whitePaint.setAntiAlias(true);
-       whitePaint.setColor(Color.WHITE);
-       whitePaint.setStrokeWidth(8);
+        whitePaint = new Paint();
+        whitePaint.setAntiAlias(true);
+        whitePaint.setColor(Color.WHITE);
+        whitePaint.setStrokeWidth(4);
 
-       paintArc = new Paint();
-       paintArc.setAntiAlias(true);
-       paintArc.setStyle(Paint.Style.STROKE);
-       paintArc.setColor(GREEN);
+        paintArc = new Paint();
+        paintArc.setAntiAlias(true);
+        paintArc.setStyle(Paint.Style.STROKE);
+        paintArc.setColor(GREEN);
 
-       textPaint = new Paint();
-       textPaint.setAntiAlias(true);
-       textPaint.setColor(Color.WHITE);
-       textPaint.setTextSize(TEXT_SIZE);
+        textPaint = new Paint();
+        textPaint.setAntiAlias(true);
+        textPaint.setColor(Color.WHITE);
+        setTextSize(textPaint, 10);
 
+        traiganglePaint = new Paint();
+        traiganglePaint.setAntiAlias(true);
+        traiganglePaint.setColor(TRAIGANGLE_BLUE);
 
-       traiganglePaint = new Paint();
-       traiganglePaint.setAntiAlias(true);
-       traiganglePaint.setColor(TRAIGANGLE_BLUE);
-   }
+        centerCirclePaint = new Paint();
+        centerCirclePaint.setAntiAlias(true);
+        centerCirclePaint.setColor(CIRCLE_YELLO);
+        lg=new LinearGradient(0,0,700,700,Color.parseColor("#fee353"),Color.parseColor("#fc8317"), Shader.TileMode.MIRROR);
+        centerCirclePaint.setShader(lg);
+    }
+
+    //dp2px
+    public void setTextSize(Paint p ,float size) {
+        Context c = getContext();
+        Resources r;
+        if (c == null)
+            r = Resources.getSystem();
+        else
+            r = c.getResources();
+        p.setTextSize(TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, size, r.getDisplayMetrics()));
+    }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -119,11 +147,12 @@ public class CircleMenuView extends View{
      */
     private void drawTriangle(Canvas canvas){
         Path path = new Path();
-        path.moveTo(x-15+getLeft(),getTop());
-        path.lineTo(x+getLeft(),20+getTop());
-        path.lineTo(x+15+getLeft(),getTop());
+        path.moveTo(x-15+getLeft(),getTop()+r/2+6*r/100+10);
+        path.lineTo(x+getLeft(),getTop()-20+r/2+6*r/100+10);
+        path.lineTo(x+15+getLeft(),getTop()+r/2+6*r/100+10);
         path.close();
         canvas.drawPath(path,traiganglePaint);
+        canvas.drawCircle(x+getLeft(),y+getTop(),r*38/100,centerCirclePaint);
     }
 
     /**
@@ -136,15 +165,15 @@ public class CircleMenuView extends View{
             String text = data.get(j).getHw_item();
             for (int i = 0; i < text.length(); i++) {
                 String s = text.substring(i,i+1);
-                if(data.get(j).getIsChoose() == 1)
-                    textPaint.setColor(TRAIGANGLE_BLUE);
-                else
-                    textPaint.setColor(Color.WHITE);
+//                if(data.get(j).getIsChoose() == 1)
+//                    textPaint.setColor(TRAIGANGLE_BLUE);
+//                else
+//                    textPaint.setColor(Color.WHITE);
 
                 if(i == 0)
-                    canvas.drawText(s,x-getTextWidth(s)/2,y/7*(i+1),textPaint);
+                    canvas.drawText(s,x-getTextWidth(s)/2,y/8*(i+1),textPaint);
                 else
-                    canvas.drawText(s,x-getTextWidth(s)/2,y/7+getTextHeight()*i,textPaint);
+                    canvas.drawText(s,x-getTextWidth(s)/2,y/8+getTextHeight()*i,textPaint);
             }
             canvas.rotate(avg_angle,x,y);
         }
@@ -182,11 +211,13 @@ public class CircleMenuView extends View{
         }
         for (int i = 0; i < data.size(); i++) {
             if(data.get(i).getIsChoose() == 1){
-                paintArc.setColor(Color.parseColor("#e0f5ff"));
+                paintArc.setColor(Color.parseColor("#fdd338"));
+                paintArc.setShader(lg);
                 canvas.drawArc(mRect,-90+avg_angle*i-avg_angle/2,avg_angle,false,paintArc);
             }
             if(data.get(i).getState() == 3){
                 paintArc.setColor(FINISH_GREY);
+                paintArc.setShader(null);
                 canvas.drawArc(mRect,-90+avg_angle*i-avg_angle/2,avg_angle,false,paintArc);
             }else
                 paintArc.setColor(GREEN);
@@ -204,28 +235,29 @@ public class CircleMenuView extends View{
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-       int width = MeasureSpec.getSize(widthMeasureSpec);
-       int mode = MeasureSpec.getMode(widthMeasureSpec);
-       margin = getPaddingBottom();
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int mode = MeasureSpec.getMode(widthMeasureSpec);
+        margin = getPaddingBottom();
         Log.e("210",getLeft()+"   "+margin);
-       if(mode == MeasureSpec.AT_MOST){
-           setMeasuredDimension(500,500);
-           x = 250;
-           y = 250;
-           r = 250;
-           w = 500;
-           h = 500;
-       }else {
-           setMeasuredDimension(width,width);
-           x = width/2;
-           y = width/2;
-           r = width/2;
-           w = width;
-           h = width;
-           ARC_WIDTH = x/2;
-       }
+        if(mode == MeasureSpec.AT_MOST){
+            setMeasuredDimension(500,500);
+            x = 250;
+            y = 250;
+            r = 250;
+            w = 500;
+            h = 500;
+        }else {
+            setMeasuredDimension(width,width);
+            x = width/2;
+            y = width/2;
+            r = width/2;
+            w = width;
+            h = width;
+            ARC_WIDTH = x/2;
+        }
         mRect = new RectF(0+ARC_WIDTH/2,0+ARC_WIDTH/2,width-ARC_WIDTH/2,width-ARC_WIDTH/2);
     }
+
 
     /**
      * 获取旋转的角度
@@ -375,9 +407,9 @@ public class CircleMenuView extends View{
         int ret;
         int positon = Math.round((Math.round(total_angle)%360)/avg_angle);
         if(positon<0){
-             ret = -positon;
+            ret = -positon;
         }else
-             ret = data.size()-positon;
+            ret = data.size()-positon;
         if(ret == data.size())
             ret = 0;
         data.get(ret).setIsChoose(1);
